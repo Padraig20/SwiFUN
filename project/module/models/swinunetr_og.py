@@ -160,6 +160,8 @@ class SwinUNETR(nn.Module):
             norm_layer=nn.LayerNorm,
             use_checkpoint=use_checkpoint,
             spatial_dims=spatial_dims,
+            first_window_size=window_size,
+            img_size=img_size,
             downsample=look_up_option(downsample, MERGING_MODE) if isinstance(downsample, str) else downsample,
             use_v2=use_v2,
         )
