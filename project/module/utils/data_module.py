@@ -260,7 +260,6 @@ class fMRIDataModule(pl.LightningDataModule):
         self.train_loader = DataLoader(self.train_dataset, **get_params(train=True))
         self.val_loader = DataLoader(self.val_dataset, **get_params(train=False))
         self.test_loader = DataLoader(self.test_dataset, **get_params(train=False))
-        
 
     def train_dataloader(self):
         return self.train_loader

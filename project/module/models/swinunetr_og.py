@@ -29,6 +29,8 @@ from monai.networks.layers import DropPath, trunc_normal_
 from monai.utils import ensure_tuple_rep, look_up_option, optional_import
 from monai.utils.deprecate_utils import deprecated_arg
 
+from .SwiFT.swin4d_transformer_ver7 import SwinTransformer4D
+
 rearrange, _ = optional_import("einops", name="rearrange")
 
 __all__ = [
@@ -143,7 +145,7 @@ class SwinUNETR(nn.Module):
 
         self.normalize = normalize
 
-        self.swinViT = SwinTransformer(
+        self.swinViT = SwinTransformer4D(
             in_chans=in_channels,
             embed_dim=feature_size,
             window_size=window_size,
