@@ -129,7 +129,7 @@ class SwinUNETR(nn.Module):
         if spatial_dims not in (2, 3, 4):
             raise ValueError("spatial dimension should be 2, 3 or 4.")
 
-        self._check_input_size(img_size[:3])
+        #self._check_input_size(img_size[:3])
 
         if not (0 <= drop_rate <= 1):
             raise ValueError("dropout rate should be between 0 and 1.")
