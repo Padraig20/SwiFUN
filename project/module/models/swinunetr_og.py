@@ -121,10 +121,10 @@ class SwinUNETR(nn.Module):
 
         super().__init__()
 
-        img_size = ensure_tuple_rep(img_size, spatial_dims)
+        #img_size = ensure_tuple_rep(img_size, spatial_dims)
         self.patch_size = patch_size
-        patch_sizes = ensure_tuple_rep(self.patch_size, spatial_dims) # window size = 
-        window_size = ensure_tuple_rep(window_size, spatial_dims) # window size = 7
+        #patch_sizes = ensure_tuple_rep(self.patch_size, spatial_dims) # window size = 
+        #window_size = ensure_tuple_rep(window_size, spatial_dims) # window size = 7
 
         if spatial_dims not in (2, 3, 4):
             raise ValueError("spatial dimension should be 2, 3 or 4.")
@@ -151,7 +151,7 @@ class SwinUNETR(nn.Module):
             in_chans=in_channels, #
             embed_dim=feature_size, #
             window_size=window_size, #
-            patch_size=patch_sizes, #
+            patch_size=patch_size, #
             depths=depths, #
             num_heads=num_heads, #
             c_multiplier=2, # TODO check
