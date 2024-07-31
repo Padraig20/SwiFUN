@@ -44,7 +44,55 @@ __all__ = [
     "MERGING_MODE",
     "BasicLayer",
     "SwinTransformer",
+    AvgMaxPool3D,
 ]
+
+import torch
+import torch.nn as nn
+
+class AvgMaxPool3D(nn.Module):
+    def __init__(self, num_channels):
+        """
+        Initializes the AvgMaxPool3D module.
+        
+        Args:
+        num_channels (int): The number of channels in the input feature map.
+        """
+        super(AvgMaxPool3D, self).__init__()
+        self.conv = nn.Conv3d(2 * num_channels, num_channels, kernel_size=1)
+
+    def forward(self, x):
+        """
+        Forward pass of the AvgMaxPool3D layer.
+        
+        Args:
+        x (torch.Tensor): The input tensor with shape (B, C, H, D, W, T).
+        
+        Returns:
+        torch.Tensor: Output tensor with shape (B, H, D, W, C).
+        """
+        B, C, H, D, W, T = x.size()
+        
+        # Permute to (B, C, H, D, W, T) -> (B, C, H*D*W, T)
+        x = x.view(B, C, H * D * W, T)
+        
+        # Apply average and max pooling along the temporal dimension
+        avg_pooled = torch.mean(x, dim=-1, keepdim=True)  # (B, C, H*D*W, 1)
+        max_pooled = torch.max(x, dim=-1, keepdim=True)[0]  # (B, C, H*D*W, 1)
+        
+        # Concatenate along the channel dimension
+        combined = torch.cat((avg_pooled, max_pooled), dim=1)  # (B, 2C, H*D*W, 1)
+        
+        # Reshape back to (B, 2C, H, D, W)
+        combined = combined.view(B, 2 * C, H, D, W)
+        
+        # Apply a 1x1x1 convolution to reduce the channel dimension
+        combined = self.conv(combined)
+        
+        # Permute to (B, H, D, W, C) to match the desired output format
+        combined = combined.permute(0, 2, 3, 4, 1)
+        
+        return combined
 
 
 class SwinUNETR(nn.Module):
@@ -145,6 +193,15 @@ class SwinUNETR(nn.Module):
 
         self.normalize = normalize
         
+        #TODO check
+        in_channels = 1
+        feature_size = 36
+        window_size = (4, 4, 4, 4)
+        patch_size = (6, 6, 6, 1)
+        depths = (2, 2, 6, 2)
+        num_heads = (3, 6, 12, 24)
+        c_multiplier = 2
+        
         print(f"SwinUNETR(img_size={img_size}, in_channels={in_channels}, out_channels={out_channels}, feature_size={feature_size}, depths={depths}, num_heads={num_heads}, patch_size={patch_size}, window_size={window_size}, normalize={normalize})")
         
         self.swinViT = SwinTransformer4D(
@@ -165,6 +222,8 @@ class SwinUNETR(nn.Module):
         )
         
         spatial_dims = 3
+        
+        self.squeeze_temporal = AvgMaxPool3D(num_channels=feature_size) # expect [B, C, H, D, W, T]
         
         self.encoder1 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
@@ -332,12 +391,12 @@ class SwinUNETR(nn.Module):
         #if not torch.jit.is_scripting():
         #    self._check_input_size(x_in.shape[2:5])
         hidden_states_out = self.swinViT(x_in)
-        print(hidden_states_out.shape)
-        print(hidden_states_out[0].shape)
-        print(hidden_states_out[1].shape)
-        print(hidden_states_out[2].shape)
-        print(hidden_states_out[3].shape)
-        print(hidden_states_out[4].shape)
+        print(f"hidden_states_out.shape: {hidden_states_out.shape}")
+        print(f"hidden_states_out[0].shape: {hidden_states_out[0].shape}")
+        print(f"hidden_states_out[1].shape: {hidden_states_out[1].shape}")
+        print(f"hidden_states_out[2].shape: {hidden_states_out[2].shape}")
+        print(f"hidden_states_out[3].shape: {hidden_states_out[3].shape}")
+        print(f"hidden_states_out[4].shape: {hidden_states_out[4].shape}")
         enc0 = self.encoder1(x_in)
         enc1 = self.encoder2(hidden_states_out[0])
         enc2 = self.encoder3(hidden_states_out[1])
