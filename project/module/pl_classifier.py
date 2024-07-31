@@ -662,7 +662,7 @@ class LitClassifier(pl.LightningModule):
         group.add_argument("--out_chans", type=int, default=1, help="Channel size of target output")
         group.add_argument("--embed_dim", type=int, default=24, help="embedding size (recommend to use 24, 36, 48)")
         group.add_argument("--window_size", nargs="+", type=int, default=[4, 4, 4, 6], help="window size from the second layers")
-        group.add_argument("--patch_size",  type=int, default=2, help="patch size")
+        group.add_argument("--patch_size", nargs="+", type=int, default=[6, 6, 6, 1], help="patch size")
         group.add_argument("--use_v2", action='store_true', help="whether to use SwinUNETR v2")
         group.add_argument("--depths", nargs="+", default=[2, 2, 6, 2], type=int, help="depth of layers in each stage of encoder")
         group.add_argument("--num_heads", nargs="+", default=[3, 6, 12, 24], type=int, help="The number of heads for each attention layer")
