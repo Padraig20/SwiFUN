@@ -146,24 +146,20 @@ class SwinUNETR(nn.Module):
         self.normalize = normalize
 
         self.swinViT = SwinTransformer4D(
-            in_chans=in_channels,
-            embed_dim=feature_size,
-            window_size=window_size,
-            patch_size=patch_sizes,
-            depths=depths,
-            num_heads=num_heads,
-            mlp_ratio=4.0,
-            qkv_bias=True,
-            drop_rate=drop_rate,
-            attn_drop_rate=attn_drop_rate,
-            drop_path_rate=dropout_path_rate,
-            norm_layer=nn.LayerNorm,
-            use_checkpoint=use_checkpoint,
-            spatial_dims=spatial_dims,
-            first_window_size=window_size,
-            img_size=img_size,
-            downsample=look_up_option(downsample, MERGING_MODE) if isinstance(downsample, str) else downsample,
-            use_v2=use_v2,
+            in_chans=in_channels, #
+            embed_dim=feature_size, #
+            window_size=window_size, #
+            patch_size=patch_sizes, #
+            depths=depths, #
+            num_heads=num_heads, #
+            c_multiplier=2, # TODO check
+            drop_rate=drop_rate, #
+            attn_drop_rate=attn_drop_rate, #
+            drop_path_rate=dropout_path_rate, #
+            first_window_size=window_size, #
+            img_size=img_size, #
+            last_layer_full_MSA=True, # TODO check
+            to_float=True, # TODO check
         )
 
         self.encoder1 = UnetrBasicBlock(
