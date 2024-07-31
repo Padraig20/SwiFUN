@@ -144,6 +144,11 @@ class SwinUNETR(nn.Module):
             raise ValueError("feature_size should be divisible by 12.")
 
         self.normalize = normalize
+        
+        def __repr__(self):
+            return f"SwinUNETR(img_size={self.img_size}, in_channels={self.swinViT.in_chans}, out_channels={self.out.out_channels}, feature_size={self.swinViT.embed_dim}, depths={self.swinViT.depths}, num_heads={self.swinViT.num_heads}, patch_size={self.patch_size}, window_size={self.swinViT.window_size}, normalize={self.normalize})"
+        
+        print(__repr__(self))
 
         self.swinViT = SwinTransformer4D(
             in_chans=in_channels, #
