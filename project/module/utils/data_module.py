@@ -127,7 +127,7 @@ class fMRIDataModule(pl.LightningDataModule):
     # filter subjects with metadata and pair subject names with their target values (+ sex)
     def make_subject_dict(self):
         # output: {'subj1':[target1,target2],'subj2':[target1,target2]...}
-        img_root = os.path.join(self.hparams.image_path, 'img')
+        img_root = os.path.join(self.hparams.image_path, 'img')     
         final_dict = dict()
         if self.hparams.dataset_name == "S1200":
             subject_list = os.listdir(img_root)
@@ -142,7 +142,7 @@ class fMRIDataModule(pl.LightningDataModule):
             else: raise NotImplementedError()
             
             if 'tfMRI' in task_name: 
-                beta_map_list = os.listdir(task_path)
+                beta_map_list = os.listdir(self.hparams.task_path)
 
                 for subject in subject_list:
                     subject_name = subject
@@ -153,7 +153,7 @@ class fMRIDataModule(pl.LightningDataModule):
                                 motion_type = '1st_lev_with_motion_conf'
                             else:
                                 motion_type = '1st_lev_event_only'
-                            target_path =  os.path.join(task_path, subject_name,f'{subject_name}_{os.path.basename(task_path)}_{motion_type}_{cope}.nii.gz')
+                            target_path =  os.path.join(self.hparams.task_path, subject_name,f'{subject_name}_{os.path.basename(self.hparams.task_path)}_{motion_type}_{self.hparams.cope}.nii.gz')
                             sex=0 # dummy variable, since we do not need this variable
                             if not os.path.exists(target_path):
                                 continue
