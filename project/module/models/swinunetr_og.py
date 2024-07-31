@@ -162,6 +162,8 @@ class SwinUNETR(nn.Module):
             to_float=True, # TODO check
         )
         
+        spatial_dims = 3
+        
         self.encoder1 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
             in_channels=in_channels,
@@ -326,7 +328,14 @@ class SwinUNETR(nn.Module):
     def forward(self, x_in, group_in=None):
         if not torch.jit.is_scripting():
             self._check_input_size(x_in.shape[2:])
+        print(x_in.shape)
         hidden_states_out = self.swinViT(x_in)
+        print(hidden_states_out.shape)
+        print(hidden_states_out[0].shape)
+        print(hidden_states_out[1].shape)
+        print(hidden_states_out[2].shape)
+        print(hidden_states_out[3].shape)
+        print(hidden_states_out[4].shape)
         enc0 = self.encoder1(x_in)
         enc1 = self.encoder2(hidden_states_out[0])
         enc2 = self.encoder3(hidden_states_out[1])

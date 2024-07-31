@@ -223,7 +223,7 @@ class UKB(BaseDataset):
             y = y.permute(0,2,3,4,1) 
 
             if self.time_as_channel:
-                y = y.permute(0,4,1,2,3).squeeze()
+                y = y.permute(0,4,1,2,3)#.squeeze()
 
         return {
                     "fmri_sequence": y,
