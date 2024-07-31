@@ -126,8 +126,8 @@ class SwinUNETR(nn.Module):
         patch_sizes = ensure_tuple_rep(self.patch_size, spatial_dims) # window size = 
         window_size = ensure_tuple_rep(window_size, spatial_dims) # window size = 7
 
-        if spatial_dims not in (2, 3):
-            raise ValueError("spatial dimension should be 2 or 3.")
+        if spatial_dims not in (2, 3, 4):
+            raise ValueError("spatial dimension should be 2, 3 or 4.")
 
         self._check_input_size(img_size)
 
