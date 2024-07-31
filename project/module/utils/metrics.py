@@ -1,9 +1,3 @@
-import torch
-import numpy as np
-from torch.nn import functional as F
-from math import exp
-
-
 class Metrics:
     @staticmethod
     def get_accuracy(y_hat, y):

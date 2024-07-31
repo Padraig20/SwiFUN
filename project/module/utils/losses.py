@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
-
-from torchvision import models
 
 #################################################################################################
 # Contrastice loss code adapted from TCLR: Temporal Contrastive Learning for Video Representation
@@ -55,11 +52,9 @@ class NTXentLoss(torch.nn.Module):
         representations = torch.cat([zjs, zis], dim=0)
 
         similarity_matrix = self.similarity_function(representations, representations)
-        # print(f'similarity_matrix shpae is {similarity_matrix.shape}')
 
         # filter out the scores from the positive samples
         l_pos = torch.diag(similarity_matrix, self.batch_size)
-        # print(f'l_pos shpae is {l_pos.shape}')
 
         r_pos = torch.diag(similarity_matrix, -self.batch_size)
         positives = torch.cat([l_pos, r_pos]).view(2 * self.batch_size, 1)
@@ -82,14 +77,8 @@ def global_local_temporal_contrastive(lsr,gdr, temperature):
     #lsr,gdr shape should be  [BS,num_clips,128]
     num_clips = lsr.shape[1]
     similarity_matrix = torch.bmm(lsr, gdr.permute(0,2,1)) # [BS, num_clips, num_clips]
-    # print(similarity_matrix)
     similarity_matrix = torch.cat((similarity_matrix, similarity_matrix.permute(0,2,1)),dim=0) # [BS*2, num_clips, num_clips]
-    # print()
-    # print(similarity_matrix)
     similarity_matrix = similarity_matrix.view(-1, num_clips) # [BS*2*num_clips, num_clips]
-    # print()
-    # print(similarity_matrix)
-    # print()
     sample_lab = [i for i in range(num_clips)]
     label = []
     for i in range(lsr.shape[0]*2):

@@ -1,7 +1,6 @@
 import math
 import torch
 from torch.optim import Optimizer
-from torch.optim import lr_scheduler
 from torch.optim.lr_scheduler import LambdaLR
 from torch.optim.lr_scheduler import _LRScheduler
 
