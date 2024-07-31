@@ -2,13 +2,12 @@ import os
 import pytorch_lightning as pl
 import numpy as np
 import pandas as pd
-from torch.utils.data import DataLoader, Subset
-from .data_preprocess_and_load.datasets import S1200, ABCD, UKB, Dummy
+from torch.utils.data import DataLoader
+from .data_preprocess_and_load.datasets import ABCD, UKB, Dummy
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from .parser import str2bool
 
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.preprocessing import LabelEncoder
 
 class fMRIDataModule(pl.LightningDataModule):
     def __init__(self, **kwargs):
@@ -38,8 +37,6 @@ class fMRIDataModule(pl.LightningDataModule):
     def get_dataset(self):
         if self.hparams.dataset_name == "Dummy":
             return Dummy
-        elif self.hparams.dataset_name == "S1200":
-            return S1200
         elif self.hparams.dataset_name == "ABCD":
             return ABCD
         elif 'UKB' in self.hparams.dataset_name:
@@ -48,10 +45,8 @@ class fMRIDataModule(pl.LightningDataModule):
             raise NotImplementedError
 
     def convert_subject_list_to_idx_list(self, train_names, val_names, test_names, subj_list):
-        #subj_idx = np.array([str(x[0]) for x in subj_list])
         subj_idx = np.array([str(x[1]) for x in subj_list])
         S = np.unique([x[1] for x in subj_list])
-        # print(S)
         print('unique subjects:',len(S))  
         train_idx = np.where(np.in1d(subj_idx, train_names))[0].tolist()
         val_idx = np.where(np.in1d(subj_idx, val_names))[0].tolist()
@@ -67,19 +62,14 @@ class fMRIDataModule(pl.LightningDataModule):
     
     def determine_split_stratified(self, S, idx):
         print('making stratified split')
-        #S = np.unique([x[1] for x in index_l]) #len(np.unique([x[1] for x in index_l]))
         site_dict = {x:S[x][idx] for x in S} # index 2: site_id, idex 3: data type (ABIDE1/ABIDE2)
         site_ids = np.array(list(site_dict.values()))
-        #print('site_ids:',site_ids)
-        #print('S:',S)
-        #subjects = list(S.keys())
         
         #remove sites that has only one valid samples
         one_value_sites=[]
         values, counts = np.unique(site_ids, return_counts=True)
-        # Print the value counts
+
         for value, count in zip(values, counts):
-            # print(f"{value}: {count}") # 20,40 has one level
             if count == 1:
                 one_value_sites.append(value)
                 
@@ -105,7 +95,7 @@ class fMRIDataModule(pl.LightningDataModule):
         remaining = np.setdiff1d(S, S_train) # np.setdiff1d(np.arange(S), S_train)
         S_val = np.random.choice(remaining, S_val, replace=False)
         S_test = np.setdiff1d(S, np.concatenate([S_train, S_val])) # np.setdiff1d(np.arange(S), np.concatenate([S_train, S_val]))
-        # train_idx, val_idx, test_idx = self.convert_subject_list_to_idx_list(S_train, S_val, S_test, self.subject_list)
+
         self.save_split({"train_subjects": S_train, "val_subjects": S_val, "test_subjects": S_test})
         return S_train, S_val, S_test
     
@@ -294,14 +284,6 @@ class fMRIDataModule(pl.LightningDataModule):
             train_names, val_names, test_names = self.load_split()
         else:
             train_names, val_names, test_names = self.determine_split_randomly(subject_dict)
-        
-        # if self.hparams.bad_subj_path:
-        #     bad_subjects = open(self.hparams.bad_subj_path, "r").readlines()
-        #     for bad_subj in bad_subjects:
-        #         bad_subj = bad_subj.strip()
-        #         if bad_subj in list(subject_dict.keys()):
-        #             print(f'removing bad subject: {bad_subj}')
-        #             del subject_dict[bad_subj]
         
         if self.hparams.limit_training_samples:
             train_names = np.random.choice(train_names, size=self.hparams.limit_training_samples, replace=False, p=None)
