@@ -222,8 +222,8 @@ class UKB(BaseDataset):
             y = torch.nn.functional.pad(y, (3, 9, 0, 0, 10, 8), value=background_value) # adjust this padding level according to your data 
             y = y.permute(0,2,3,4,1) 
 
-            if self.time_as_channel:
-                y = y.permute(0,4,1,2,3)#.squeeze()
+            #if self.time_as_channel:
+            #    y = y.permute(0,4,1,2,3).squeeze()
 
         return {
                     "fmri_sequence": y,
