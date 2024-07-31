@@ -391,6 +391,7 @@ class SwinUNETR(nn.Module):
         #if not torch.jit.is_scripting():
         #    self._check_input_size(x_in.shape[2:5])
         hidden_states_out = self.swinViT(x_in)
+        hidden_states_out = self.squeeze_temporal(hidden_states_out)
         print(f"hidden_states_out.shape: {hidden_states_out.shape}")
         print(f"hidden_states_out[0].shape: {hidden_states_out[0].shape}")
         print(f"hidden_states_out[1].shape: {hidden_states_out[1].shape}")
