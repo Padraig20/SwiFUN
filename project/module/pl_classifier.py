@@ -661,7 +661,7 @@ class LitClassifier(pl.LightningModule):
         group.add_argument("--in_chans", type=int, default=1, help="Channel size of input image")
         group.add_argument("--out_chans", type=int, default=1, help="Channel size of target output")
         group.add_argument("--embed_dim", type=int, default=24, help="embedding size (recommend to use 24, 36, 48)")
-        group.add_argument("--window_size",  type=int, default=7, help="window size from the second layers")
+        group.add_argument("--window_size", nargs="+", type=int, default=[4, 4, 4, 6], help="window size from the second layers")
         group.add_argument("--patch_size",  type=int, default=2, help="patch size")
         group.add_argument("--use_v2", action='store_true', help="whether to use SwinUNETR v2")
         group.add_argument("--depths", nargs="+", default=[2, 2, 6, 2], type=int, help="depth of layers in each stage of encoder")
@@ -670,6 +670,7 @@ class LitClassifier(pl.LightningModule):
         group.add_argument("--last_layer_full_MSA", type=str2bool, default=False, help="whether to use full-scale multi-head self-attention at the last layers")
         group.add_argument("--clf_head_version", type=str, default="v1", help="clf head version, v2 has a hidden layer")
         group.add_argument("--attn_drop_rate", type=float, default=0, help="dropout rate of attention layers")
+        #TODO add first window size
 
         ## others
         group.add_argument("--scalability_check", action='store_true', help="whether to check scalability")
