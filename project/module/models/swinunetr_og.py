@@ -162,8 +162,6 @@ class SwinUNETR(nn.Module):
             to_float=True, # TODO check
         )
         
-        spatial_dims = 3
-
         self.encoder1 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
             in_channels=in_channels,
