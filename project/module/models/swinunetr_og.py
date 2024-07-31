@@ -223,7 +223,7 @@ class SwinUNETR(nn.Module):
         
         spatial_dims = 3
         
-        self.squeeze_temporal = AvgMaxPool3D(num_channels=feature_size) # expect [B, C, H, D, W, T]
+        self.squeeze_temporal = AvgMaxPool3D(num_channels=feature_size*8) # expect [B, C, H, D, W, T], C*8 due to being in last stage
         
         self.encoder1 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
