@@ -44,7 +44,7 @@ __all__ = [
     "MERGING_MODE",
     "BasicLayer",
     "SwinTransformer",
-    AvgMaxPool3D,
+    "AvgMaxPool3D",
 ]
 
 import torch
