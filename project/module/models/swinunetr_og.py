@@ -68,7 +68,7 @@ class SwinUNETR(nn.Module):
         img_size: Sequence[int] | int,
         in_channels: int,
         out_channels: int,
-        patch_size: int = 2,
+        patch_size: int = (6, 6, 6, 1),
         window_size: int = 7,
         depths: Sequence[int] = (2, 2, 2, 2),
         num_heads: Sequence[int] = (3, 6, 12, 24),
@@ -145,11 +145,8 @@ class SwinUNETR(nn.Module):
 
         self.normalize = normalize
         
-        def __repr__(self):
-            return f"SwinUNETR(img_size={self.img_size}, in_channels={self.swinViT.in_chans}, out_channels={self.out.out_channels}, feature_size={self.swinViT.embed_dim}, depths={self.swinViT.depths}, num_heads={self.swinViT.num_heads}, patch_size={self.patch_size}, window_size={self.swinViT.window_size}, normalize={self.normalize})"
+        print(f"SwinUNETR(img_size={img_size}, in_channels={in_channels}, out_channels={out_channels}, feature_size={feature_size}, depths={depths}, num_heads={num_heads}, patch_size={patch_size}, window_size={window_size}, normalize={normalize})")
         
-        print(__repr__(self))
-
         self.swinViT = SwinTransformer4D(
             in_chans=in_channels, #
             embed_dim=feature_size, #
