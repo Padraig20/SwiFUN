@@ -326,9 +326,9 @@ class SwinUNETR(nn.Module):
             )
 
     def forward(self, x_in, group_in=None):
+        print(x_in.shape)
         if not torch.jit.is_scripting():
             self._check_input_size(x_in.shape[:3])
-        print(x_in.shape)
         hidden_states_out = self.swinViT(x_in)
         print(hidden_states_out.shape)
         print(hidden_states_out[0].shape)
