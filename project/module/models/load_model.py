@@ -1,8 +1,3 @@
-from .swin4d_transformer_ver7 import SwinTransformer4D as SwinTransformer4D_ver7
-# from .mae_swin4d_transformer_ver7 import MaskedAutoencoderSwinTransformer4D as MaskedAutoencoderSwinTransformer4D_ver7
-# from .mae_swin4d_transformer_ver8 import MaskedAutoencoderSwinTransformer4D as MaskedAutoencoderSwinTransformer4D_ver8
-# from .mae_swin4d_transformer_ver9 import MaskedAutoencoderSwinTransformer4D as MaskedAutoencoderSwinTransformer4D_ver9
-#from monai.networks.nets import SwinUNETR
 from .swinunetr_og import SwinUNETR, SwinUNETR_encoder
 
 def load_model(model_name, hparams=None):

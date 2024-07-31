@@ -22,7 +22,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from torch.nn import LayerNorm
-from typing_extensions import Final
 
 from monai.networks.blocks import MLPBlock as Mlp
 from monai.networks.blocks import PatchEmbed, UnetOutBlock, UnetrBasicBlock, UnetrUpBlock
@@ -323,14 +322,6 @@ class SwinUNETR(nn.Module):
                 f"spatial dimensions {wrong_dims} of input image (spatial shape: {spatial_shape})"
                 f" must be divisible by {self.patch_size}**5."
             )
-        # img_size = np.array(spatial_shape)
-        # remainder = (img_size % self.patch_size) > 0
-        # if remainder.any():
-        #     wrong_dims = (np.where(remainder)[0] + 2).tolist()
-        #     raise ValueError(
-        #         f"spatial dimensions {wrong_dims} of input image (spatial shape: {spatial_shape})"
-        #         f" must be divisible by {self.patch_size}*16."
-        #     )
 
     def forward(self, x_in, group_in=None):
         if not torch.jit.is_scripting():
@@ -469,107 +460,6 @@ class SwinUNETR_encoder(nn.Module):
             use_v2=use_v2,
         )
 
-#         self.encoder1 = UnetrBasicBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=in_channels,
-#             out_channels=feature_size,
-#             kernel_size=3,
-#             stride=1,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.encoder2 = UnetrBasicBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=feature_size,
-#             out_channels=feature_size,
-#             kernel_size=3,
-#             stride=1,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.encoder3 = UnetrBasicBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=2 * feature_size,
-#             out_channels=2 * feature_size,
-#             kernel_size=3,
-#             stride=1,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.encoder4 = UnetrBasicBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=4 * feature_size,
-#             out_channels=4 * feature_size,
-#             kernel_size=3,
-#             stride=1,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.encoder10 = UnetrBasicBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=16 * feature_size,
-#             out_channels=16 * feature_size,
-#             kernel_size=3,
-#             stride=1,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.decoder5 = UnetrUpBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=16 * feature_size,
-#             out_channels=8 * feature_size,
-#             kernel_size=3,
-#             upsample_kernel_size=2,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.decoder4 = UnetrUpBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=feature_size * 8,
-#             out_channels=feature_size * 4,
-#             kernel_size=3,
-#             upsample_kernel_size=2,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.decoder3 = UnetrUpBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=feature_size * 4,
-#             out_channels=feature_size * 2,
-#             kernel_size=3,
-#             upsample_kernel_size=2,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-#         self.decoder2 = UnetrUpBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=feature_size * 2,
-#             out_channels=feature_size,
-#             kernel_size=3,
-#             upsample_kernel_size=2,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.decoder1 = UnetrUpBlock(
-#             spatial_dims=spatial_dims,
-#             in_channels=feature_size,
-#             out_channels=feature_size,
-#             kernel_size=3,
-#             upsample_kernel_size=2,
-#             norm_name=norm_name,
-#             res_block=True,
-#         )
-
-#         self.out = UnetOutBlock(spatial_dims=spatial_dims, in_channels=feature_size, out_channels=out_channels)
-
     def load_from(self, weights):
         with torch.no_grad():
             self.swinViT.patch_embed.proj.weight.copy_(weights["state_dict"]["module.patch_embed.proj.weight"])
@@ -629,30 +519,11 @@ class SwinUNETR_encoder(nn.Module):
                 f"spatial dimensions {wrong_dims} of input image (spatial shape: {spatial_shape})"
                 f" must be divisible by {self.patch_size}**5."
             )
-        # img_size = np.array(spatial_shape)
-        # remainder = (img_size % self.patch_size) > 0
-        # if remainder.any():
-        #     wrong_dims = (np.where(remainder)[0] + 2).tolist()
-        #     raise ValueError(
-        #         f"spatial dimensions {wrong_dims} of input image (spatial shape: {spatial_shape})"
-        #         f" must be divisible by {self.patch_size}*16."
-        #     )
 
     def forward(self, x_in, group_in=None):
         if not torch.jit.is_scripting():
             self._check_input_size(x_in.shape[2:])
         hidden_states_out = self.swinViT(x_in, self.normalize)
-        # enc0 = self.encoder1(x_in)
-        # enc1 = self.encoder2(hidden_states_out[0])
-        # enc2 = self.encoder3(hidden_states_out[1])
-        # enc3 = self.encoder4(hidden_states_out[2])
-        # dec4 = self.encoder10(hidden_states_out[4])
-        # dec3 = self.decoder5(dec4, hidden_states_out[3])
-        # dec2 = self.decoder4(dec3, enc3)
-        # dec1 = self.decoder3(dec2, enc2)
-        # dec0 = self.decoder2(dec1, enc1)
-        # out = self.decoder1(dec0, enc0)
-        # logits = self.out(out)
 
         return hidden_states_out[4]
         

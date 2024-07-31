@@ -1,6 +1,5 @@
 from unittest.mock import patch
 from torch import nn as nn
-import torch
 
 class PatchEmbed(nn.Module):
     """ 4D Image to Patch Embedding
