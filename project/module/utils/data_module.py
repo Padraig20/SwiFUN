@@ -119,68 +119,8 @@ class fMRIDataModule(pl.LightningDataModule):
         # output: {'subj1':[target1,target2],'subj2':[target1,target2]...}
         img_root = os.path.join(self.hparams.image_path, 'img')     
         final_dict = dict()
-        if self.hparams.dataset_name == "S1200":
-            subject_list = os.listdir(img_root)
-            meta_data = pd.read_csv(os.path.join(self.hparams.image_path, "metadata", "HCP_1200_gender.csv"))
-            meta_data_residual = pd.read_csv(os.path.join(self.hparams.image_path, "metadata", "HCP_1200_precise_age.csv"))
-            meta_data_all = pd.read_csv(os.path.join(self.hparams.image_path, "metadata", "HCP_1200_all.csv"))
-            if self.hparams.downstream_task == 'sex': task_name = 'Gender'
-            elif self.hparams.downstream_task == 'age': task_name = 'age'
-            elif self.hparams.downstream_task == 'int_total': task_name = 'CogTotalComp_AgeAdj'
-            elif self.hparams.downstream_task == 'tfMRI' : task_name = 'tfMRI'
-            elif self.hparams.downstream_task == 'tfMRI_3D' : task_name = 'tfMRI_3D'
-            else: raise NotImplementedError()
-            
-            if 'tfMRI' in task_name: 
-                beta_map_list = os.listdir(self.hparams.task_path)
 
-                for subject in subject_list:
-                    subject_name = subject
-                    # subject_name : XXXXXX (6 digits)
-                    if subject_name in beta_map_list:
-                        if task_name == 'tfMRI_3D':
-                            if self.hparams.contrast_motion_corrected:
-                                motion_type = '1st_lev_with_motion_conf'
-                            else:
-                                motion_type = '1st_lev_event_only'
-                            target_path =  os.path.join(self.hparams.task_path, subject_name,f'{subject_name}_{os.path.basename(self.hparams.task_path)}_{motion_type}_{self.hparams.cope}.nii.gz')
-                            sex=0 # dummy variable, since we do not need this variable
-                            if not os.path.exists(target_path):
-                                continue
-                            final_dict[subject]=[sex,target_path]
-                        elif task_name == 'tfMRI':
-                            raise NotImplementedError
-            else:
-                if self.hparams.downstream_task == 'sex':
-                    meta_task = meta_data[['Subject',task_name]].dropna()
-                elif self.hparams.downstream_task == 'age':
-                    meta_task = meta_data_residual[['subject',task_name,'sex']].dropna()
-                    #rename column subject to Subject
-                    meta_task = meta_task.rename(columns={'subject': 'Subject'})
-                elif self.hparams.downstream_task == 'int_total':
-                    meta_task = meta_data[['Subject',task_name,'Gender']].dropna()  
-
-                for subject in subject_list:
-                    if int(subject) in meta_task['Subject'].values:
-                        if self.hparams.downstream_task == 'sex':
-                            target = meta_task[meta_task["Subject"]==int(subject)][task_name].values[0]
-                            target = 1 if target == "M" else 0
-                            sex = target
-                        elif self.hparams.downstream_task == 'age':
-                            target = meta_task[meta_task["Subject"]==int(subject)][task_name].values[0]
-                            sex = meta_task[meta_task["Subject"]==int(subject)]["sex"].values[0]
-                            sex = 1 if sex == "M" else 0
-                        elif self.hparams.downstream_task == 'int_total':
-                            target = meta_task[meta_task["Subject"]==int(subject)][task_name].values[0]
-                            sex = meta_task[meta_task["Subject"]==int(subject)]["Gender"].values[0]
-                            sex = 1 if sex == "M" else 0
-                        elif self.hparams.downstream_task.startswith('WM_'):
-                            target = meta_task[meta_task["Subject"]==int(subject)][task_name].values[0]
-                            sex = meta_task[meta_task["Subject"]==int(subject)]["Gender"].values[0]
-                            sex = 1 if sex == "M" else 0
-                        final_dict[subject]=[sex,target]
-
-        elif self.hparams.dataset_name == "ABCD":
+        if self.hparams.dataset_name == "ABCD":
             subject_list = [subj[4:] for subj in os.listdir(img_root)]
             
             meta_data = pd.read_csv(os.path.join(self.hparams.image_path, "metadata", "ABCD_phenotype_total.csv"))
@@ -256,7 +196,10 @@ class fMRIDataModule(pl.LightningDataModule):
                         sex = meta_task[meta_task["eid"]==int(subject[:7])].values[0]
                         final_dict[str(subject[:7])] = [sex,target]
                     else:
-                        continue 
+                        continue
+        else:
+            raise NotImplementedError("Dataset not supported")
+        
         return final_dict
 
     def setup(self, stage=None):
