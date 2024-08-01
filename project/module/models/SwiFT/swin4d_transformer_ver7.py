@@ -730,9 +730,9 @@ class SwinTransformer4D(nn.Module):
 
         # exclude last layer
         for i_layer in range(1, self.num_layers - 1):
-            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
+            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**(i_layer+1)))}")
             layer = BasicLayer(
-                dim=int(embed_dim * (c_multiplier**i_layer)),
+                dim=int(embed_dim * (c_multiplier**(i_layer+1))),
                 depth=depths[i_layer],
                 num_heads=num_heads[i_layer],
                 window_size=self.window_size,
@@ -755,7 +755,7 @@ class SwinTransformer4D(nn.Module):
                 depth=depths[(self.num_layers - 1)],
                 num_heads=num_heads[(self.num_layers - 1)],
                 window_size=self.window_size,
-                drop_path=dpr[sum(depths[: (self.num_layers)]) : sum(depths[: (self.num_layers) + 1])],
+                drop_path=dpr[sum(depths[: (self.num_layers - 1)]) : sum(depths[: (self.num_layers - 1) + 1])],
                 mlp_ratio=mlp_ratio,
                 qkv_bias=qkv_bias,
                 drop=drop_rate,
