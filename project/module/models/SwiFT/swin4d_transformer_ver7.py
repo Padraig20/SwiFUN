@@ -728,6 +728,7 @@ class SwinTransformer4D(nn.Module):
 
         # exclude last layer
         for i_layer in range(1, self.num_layers - 1):
+            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
             layer = BasicLayer(
                 dim=int(embed_dim * (c_multiplier**i_layer)),
                 depth=depths[i_layer],
@@ -746,6 +747,7 @@ class SwinTransformer4D(nn.Module):
             self.layers.append(layer)
 
         if not last_layer_full_MSA:
+            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers - 1)))}")
             layer = BasicLayer(
                 dim=int(embed_dim * c_multiplier ** (self.num_layers - 1)),
                 depth=depths[(self.num_layers - 1)],
