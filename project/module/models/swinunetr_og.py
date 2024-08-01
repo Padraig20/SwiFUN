@@ -214,7 +214,7 @@ class SwinUNETR(nn.Module):
             drop_path_rate=dropout_path_rate, #
             first_window_size=window_size, #
             img_size=img_size, #
-            last_layer_full_MSA=True, # TODO check
+            last_layer_full_MSA=False, # TODO check
             to_float=True, # TODO check
         )
         
@@ -267,7 +267,20 @@ class SwinUNETR(nn.Module):
             norm_name=norm_name,
             res_block=True,
         )
-
+        
+        """
+        self.encoder10 = UnetrBasicBlock(
+            spatial_dims=spatial_dims,
+            in_channels=4 * feature_size,
+            out_channels=4 * feature_size,
+            kernel_size=3,
+            stride=1,
+            norm_name=norm_name,
+            res_block=True,
+        )
+        """
+        
+        """
         self.encoder10 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
             in_channels=16 * feature_size,
@@ -277,6 +290,7 @@ class SwinUNETR(nn.Module):
             norm_name=norm_name,
             res_block=True,
         )
+        """
 
         self.decoder5 = UnetrUpBlock(
             spatial_dims=spatial_dims,
