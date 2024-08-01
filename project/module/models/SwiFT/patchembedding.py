@@ -58,7 +58,7 @@ class PatchEmbed(nn.Module):
 
         x = x.view(B, C, pD, sD, pH, sH, pW, sW, -1, sT)
         x = x.permute(0, 2, 4, 6, 8, 3, 5, 7, 9, 1).contiguous().view(-1, sD * sH * sW * sT * C)
-        print(x.shape)
+        #print(x.shape)
         x = self.fc(x)
         x = x.view(B, pD, pH, pW, -1, self.embed_dim).contiguous()
         x = x.permute(0, 5, 1, 2, 3, 4)
