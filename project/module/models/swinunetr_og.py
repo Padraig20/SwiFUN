@@ -421,6 +421,7 @@ class SwinUNETR(nn.Module):
         
         print(f"x_in: {x_in.shape}")
         x_in = self.temporal_squeeze_init(x_in) # (b, h, w, d, c) = [16, 96, 96, 96, 1]
+        print(f"x_in after squeeze: {x_in.shape}")
         enc0 = self.encoder1(x_in)
         
         enc1 = self.encoder2(hidden_states_out[0])

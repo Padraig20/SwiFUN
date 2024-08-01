@@ -834,6 +834,8 @@ class SwinTransformer4D(nn.Module):
         
         # assumption len depths = 4 (stages)
         
+        print(f"Layers: {len(self.layers)}")
+        
         x1 = self.pos_embeds[0](x0)
         x1 = self.layers[0](x1.contiguous())
         x1_out = self.proj_out(x1, normalize=True)
