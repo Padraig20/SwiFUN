@@ -280,7 +280,6 @@ class SwinUNETR(nn.Module):
         )
         """
         
-        """
         self.encoder10 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
             in_channels=16 * feature_size,
@@ -290,7 +289,6 @@ class SwinUNETR(nn.Module):
             norm_name=norm_name,
             res_block=True,
         )
-        """
 
         self.decoder5 = UnetrUpBlock(
             spatial_dims=spatial_dims,
