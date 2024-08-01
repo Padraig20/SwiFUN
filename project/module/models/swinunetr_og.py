@@ -271,8 +271,8 @@ class SwinUNETR(nn.Module):
         
         self.encoder10 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
-            in_channels=4 * feature_size,
-            out_channels=4 * feature_size,
+            in_channels=8 * feature_size,
+            out_channels=8 * feature_size,
             kernel_size=3,
             stride=1,
             norm_name=norm_name,
@@ -447,16 +447,25 @@ class SwinUNETR(nn.Module):
         x_in = self.temporal_squeeze_init(x_in) # (b, h, w, d, c) = [16, 96, 96, 96, 1]
         print(f"x_in after squeeze: {x_in.shape}")
         enc0 = self.encoder1(x_in)
+        print(f"enc0: {enc0.shape}")
         
         enc1 = self.encoder2(hidden_states_out[0])
+        print(f"enc1: {enc1.shape}")
         enc2 = self.encoder3(hidden_states_out[1])
+        print(f"enc2: {enc2.shape}")
         enc3 = self.encoder4(hidden_states_out[2])
+        print(f"enc3: {enc3.shape}")
         dec4 = self.encoder10(hidden_states_out[4])
+        print(f"dec4: {dec4.shape}")
         
         dec3 = self.decoder5(dec4, hidden_states_out[3])
+        print(f"dec3: {dec3.shape}")
         dec2 = self.decoder4(dec3, enc3)
+        print(f"dec2: {dec2.shape}")
         dec1 = self.decoder3(dec2, enc2)
+        print(f"dec1: {dec1.shape}")
         dec0 = self.decoder2(dec1, enc1)
+        print(f"dec0: {dec0.shape}")
         out = self.decoder1(dec0, enc0)
         
         logits = self.out(out)
