@@ -223,7 +223,7 @@ class SwinUNETR(nn.Module):
         
         spatial_dims = 3
         
-        self.temporal_squeeze_init = AvgMaxPool3D(num_channels=2) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze_init = AvgMaxPool3D(num_channels=4) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze0 = AvgMaxPool3D(num_channels=36) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze1 = AvgMaxPool3D(num_channels=72) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze2 = AvgMaxPool3D(num_channels=144) # expect [B, C, H, D, W, T], C due to being in first stage
@@ -411,11 +411,11 @@ class SwinUNETR(nn.Module):
                              self.temporal_squeeze2(hidden_states_out[2]),
                              self.temporal_squeeze3(hidden_states_out[3]),
                              self.temporal_squeeze4(hidden_states_out[4])]
-        # 0 = (b, c, h, w, d, t) = [16, 216, 96, 96, 96] [16, 36, 16, 16, 16, 20]
-        # 1 = (b, c, h, w, d, t) = [16, 1, 16, 16, 16]   [16, 72, 8, 8, 8, 20]
-        # 2 = (b, c, h, w, d, t) = [16, 2, 8, 8, 8]      [16, 144, 4, 4, 4, 20]
-        # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4]      [16, 288, 2, 2, 2, 20]
-        # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2]      [16, 288, 2, 2, 2, 20]
+        # 0 = (b, c, h, w, d, t) = [16, 216, 96, 96, 96] [16, 36, 16, 16, 16, 20]  [16, 16, 16, 16, 36]
+        # 1 = (b, c, h, w, d, t) = [16, 1, 16, 16, 16]   [16, 72, 8, 8, 8, 20]     [16, 8, 8, 8, 72]
+        # 2 = (b, c, h, w, d, t) = [16, 2, 8, 8, 8]      [16, 144, 4, 4, 4, 20]    [16, 4, 4, 4, 144]
+        # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4]      [16, 288, 2, 2, 2, 20]    [16, 2, 2, 2, 288]
+        # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2]      [16, 288, 2, 2, 2, 20]    [16, 2, 2, 2, 288]
         
         for i in range(5):
             print(f"{i} after Squeeze: {hidden_states_out[i].shape}")
