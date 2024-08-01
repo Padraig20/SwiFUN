@@ -305,7 +305,7 @@ class SwinUNETR(nn.Module):
         self.decoder5 = UnetrUpBlock(
             spatial_dims=spatial_dims,
             in_channels=feature_size * 8,
-            out_channels=feature_size * 4,
+            out_channels=feature_size * 8,
             kernel_size=3,
             upsample_kernel_size=2,
             norm_name=norm_name,
