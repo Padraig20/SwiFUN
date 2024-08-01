@@ -307,7 +307,7 @@ class SwinUNETR(nn.Module):
             in_channels=feature_size * 8,
             out_channels=feature_size * 8,
             kernel_size=3,
-            upsample_kernel_size=2,
+            upsample_kernel_size=1, #no upsampling needed here
             norm_name=norm_name,
             res_block=True,
         )
