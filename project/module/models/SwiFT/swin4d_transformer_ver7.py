@@ -749,13 +749,13 @@ class SwinTransformer4D(nn.Module):
             self.layers.append(layer)
 
         if not last_layer_full_MSA:
-            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers - 1)))}")
+            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers)))}")
             layer = BasicLayer(
                 dim=int(embed_dim * c_multiplier ** (self.num_layers - 1)),
                 depth=depths[(self.num_layers - 1)],
                 num_heads=num_heads[(self.num_layers - 1)],
                 window_size=self.window_size,
-                drop_path=dpr[sum(depths[: (self.num_layers - 1)]) : sum(depths[: (self.num_layers - 1) + 1])],
+                drop_path=dpr[sum(depths[: (self.num_layers)]) : sum(depths[: (self.num_layers) + 1])],
                 mlp_ratio=mlp_ratio,
                 qkv_bias=qkv_bias,
                 drop=drop_rate,
