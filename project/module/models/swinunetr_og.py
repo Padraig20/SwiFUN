@@ -69,11 +69,11 @@ class AvgMaxPool3D(nn.Module):
         x (torch.Tensor): The input tensor with shape (B, C, H, D, W, T).
         
         Returns:
-        torch.Tensor: Output tensor with shape (B, H, D, W, C).
+        torch.Tensor: Output tensor with shape (B, C, H, D, W).
         """
         B, C, H, D, W, T = x.size()
         
-        # Permute to (B, C, H, D, W, T) -> (B, C, H*D*W, T)
+        # Permute to (B, C, H*D*W, T)
         x = x.view(B, C, H * D * W, T)
         
         # Apply average and max pooling along the temporal dimension
@@ -87,10 +87,7 @@ class AvgMaxPool3D(nn.Module):
         combined = combined.view(B, 2 * C, H, D, W)
         
         # Apply a 1x1x1 convolution to reduce the channel dimension
-        combined = self.conv(combined)
-        
-        # Permute to (B, H, D, W, C) to match the desired output format
-        combined = combined.permute(0, 2, 3, 4, 1)
+        combined = self.conv(combined)  # (B, C, H, D, W)
         
         return combined
 
