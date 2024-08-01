@@ -223,7 +223,7 @@ class SwinUNETR(nn.Module):
         
         spatial_dims = 3
         
-        self.temporal_squeeze_init = AvgMaxPool3D(num_channels=2) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze_init = AvgMaxPool3D(num_channels=1) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze0 = AvgMaxPool3D(num_channels=36) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze1 = AvgMaxPool3D(num_channels=72) # expect [B, C, H, D, W, T], C due to being in first stage
         self.temporal_squeeze2 = AvgMaxPool3D(num_channels=144) # expect [B, C, H, D, W, T], C due to being in first stage
