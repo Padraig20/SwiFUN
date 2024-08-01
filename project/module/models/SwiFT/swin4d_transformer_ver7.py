@@ -709,7 +709,7 @@ class SwinTransformer4D(nn.Module):
         self.layers = nn.ModuleList()
         down_sample_mod = look_up_option(downsample, MERGING_MODE) if isinstance(downsample, str) else downsample
     
-        print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
+        print(f"Layer dims 0: {int(embed_dim)}")
 
         layer = BasicLayer(
             dim=int(embed_dim),
