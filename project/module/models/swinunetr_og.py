@@ -414,7 +414,7 @@ class SwinUNETR(nn.Module):
             )
 
     def forward(self, x_in, group_in=None):
-        print(x_in.shape) # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> temporal squeeze -> (16, 1, 96, 96, 96)
+        #print(x_in.shape) # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> temporal squeeze -> (16, 1, 96, 96, 96)
         
         hidden_states_out = self.swinViT(x_in) # (b, c, h, w, d, t) = [16, 288, 2, 2, 2, 20] length 5
         # 0 = (b, c, h, w, d, t) = [16, 216, 96, 96, 96, 20]
@@ -423,8 +423,8 @@ class SwinUNETR(nn.Module):
         # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4, 20]
         # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2, 20]
         
-        for i in range(5):
-            print(f"{i} before Squeeze: {hidden_states_out[i].shape}")
+        #for i in range(5):
+        #    print(f"{i} before Squeeze: {hidden_states_out[i].shape}")
         
         # temporal squeeze for each element in hidden_states_out
         hidden_states_out = [self.temporal_squeeze0(hidden_states_out[0]),
@@ -438,8 +438,8 @@ class SwinUNETR(nn.Module):
         # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4]      [16, 288, 2, 2, 2, 20]    [16, 2, 2, 2, 288]
         # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2]      [16, 288, 2, 2, 2, 20]    [16, 2, 2, 2, 288]
         
-        for i in range(5):
-            print(f"{i} after Squeeze: {hidden_states_out[i].shape}")
+        #for i in range(5):
+        #    print(f"{i} after Squeeze: {hidden_states_out[i].shape}")
         
         # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> [16, 1, 96, 96, 96]
         
