@@ -798,31 +798,56 @@ class SwinTransformer4D(nn.Module):
         self.norm = norm_layer(self.num_features)
         self.avgpool = nn.AdaptiveAvgPool1d(1)  #
         #self.head = nn.Linear(self.num_features, 1) if num_classes == 2 else num_classes
+        
+
+    
+    def proj_out(self, x, normalize=False):
+        if normalize:
+            x_shape = x.size()
+            if len(x_shape) == 6:
+                n, ch, h, w, d, t = x_shape
+                x = rearrange(x, "n c h w d t -> n h w d t c")
+                x = F.layer_norm(x, [ch])
+                x = rearrange(x, "n h w d t c -> n c h w d t")
+            elif len(x_shape) == 5:
+                n, ch, d, h, w = x_shape
+                x = rearrange(x, "n c d h w -> n d h w c")
+                x = F.layer_norm(x, [ch])
+                x = rearrange(x, "n d h w c -> n c d h w")
+            elif len(x_shape) == 4:
+                n, ch, h, w = x_shape
+                x = rearrange(x, "n c h w -> n h w c")
+                x = F.layer_norm(x, [ch])
+                x = rearrange(x, "n h w c -> n c h w")
+        return x
 
 
     def forward(self, x):
-
-        #print model parameters
-        # for name, param in self.named_parameters():
-        #     if param.requires_grad:
-        #         print(name, param.data.shape)
-
         if self.to_float:
             # converting tensor to float
             x = x.float()
-        x = self.patch_embed(x)
-        x = self.pos_drop(x)  # (b, c, h, w, d, t)
-
-        for i in range(self.num_layers):
-            x = self.pos_embeds[i](x)
-            x = self.layers[i](x.contiguous())
-
-        # moved this part to clf_mlp or reg_mlp
-
-        # x = x.flatten(start_dim=2).transpose(1, 2)  # B L C
-        # x = self.norm(x)  # B L C
-        # x = self.avgpool(x.transpose(1, 2))  # B C 1
-        # x = torch.flatten(x, 1)
-        # x = self.head(x)
-
-        return x
+        
+        # (b, c, h, w, d, t)
+        x0 = self.patch_embed(x)
+        x0 = self.pos_drop(x0)
+        x0_out = self.proj_out(x0, normalize=True)
+        
+        # assumption len depths = 4 (stages)
+        
+        x1 = self.pos_embeds[0](x0)
+        x1 = self.layers[0](x1.contiguous())
+        x1_out = self.proj_out(x1, normalize=True)
+        
+        x2 = self.pos_embeds[1](x1)
+        x2 = self.layers[1](x2.contiguous())
+        x2_out = self.proj_out(x2, normalize=True)
+        
+        x3 = self.pos_embeds[2](x2)
+        x3 = self.layers[2](x3.contiguous())
+        x3_out = self.proj_out(x3, normalize=True)
+        
+        x4 = self.pos_embeds[3](x3)
+        x4 = self.layers[3](x4.contiguous())
+        x4_out = self.proj_out(x4, normalize=True)
+        
+        return [x0_out, x1_out, x2_out, x3_out, x4_out]

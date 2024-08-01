@@ -223,8 +223,12 @@ class SwinUNETR(nn.Module):
         
         spatial_dims = 3
         
-        self.squeeze_temporal_vit = AvgMaxPool3D(num_channels=feature_size*8) # expect [B, C, H, D, W, T], C*8 due to being in last stage
-        self.squeeze_temporal = AvgMaxPool3D(num_channels=1) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze0 = AvgMaxPool3D(num_channels=1) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze1 = AvgMaxPool3D(num_channels=feature_size) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze2 = AvgMaxPool3D(num_channels=2*feature_size) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze3 = AvgMaxPool3D(num_channels=4*feature_size) # expect [B, C, H, D, W, T], C due to being in first stage
+        self.temporal_squeeze4 = AvgMaxPool3D(num_channels=8*feature_size) # expect [B, C, H, D, W, T], C due to being in first stage
+
         
         self.encoder1 = UnetrBasicBlock(
             spatial_dims=spatial_dims,
@@ -388,28 +392,48 @@ class SwinUNETR(nn.Module):
             )
 
     def forward(self, x_in, group_in=None):
-        print(x_in.shape) # (b, c, h, w, d, t)
-        #if not torch.jit.is_scripting():
-        #    self._check_input_size(x_in.shape[2:5])
-        hidden_states_out = self.swinViT(x_in)
-        hidden_states_out = self.squeeze_temporal_vit(hidden_states_out)
-        print(f"hidden_states_out.shape: {hidden_states_out.shape}")
-        print(f"hidden_states_out[0].shape: {hidden_states_out[0].shape}")
-        print(f"hidden_states_out[1].shape: {hidden_states_out[1].shape}")
-        print(f"hidden_states_out[2].shape: {hidden_states_out[2].shape}")
-        print(f"hidden_states_out[3].shape: {hidden_states_out[3].shape}")
-        print(f"hidden_states_out[4].shape: {hidden_states_out[4].shape}")
-        x_in = self.squeeze_temporal(x_in)
+        print(x_in.shape) # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> temporal squeeze -> (16, 1, 96, 96, 96)
+        
+        hidden_states_out = self.swinViT(x_in) # (b, c, h, w, d, t) = [16, 288, 2, 2, 2, 20] length 5
+        # 0 = (b, c, h, w, d, t) = [16, 216, 96, 96, 96, 20]
+        # 1 = (b, c, h, w, d, t) = [16, 1, 16, 16, 16, 20]
+        # 2 = (b, c, h, w, d, t) = [16, 2, 8, 8, 8, 20]
+        # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4, 20]
+        # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2, 20]
+        
+        for i in range(5):
+            print(f"{i} before Squeeze: {hidden_states_out[i].shape}")
+        
+        # temporal squeeze for each element in hidden_states_out
+        hidden_states_out = [self.temporal_squeeze0(hidden_states_out[0]),
+                             self.temporal_squeeze1(hidden_states_out[1]),
+                             self.temporal_squeeze2(hidden_states_out[2]),
+                             self.temporal_squeeze3(hidden_states_out[3]),
+                             self.temporal_squeeze4(hidden_states_out[4])]
+        # 0 = (b, c, h, w, d, t) = [16, 216, 96, 96, 96]
+        # 1 = (b, c, h, w, d, t) = [16, 1, 16, 16, 16]
+        # 2 = (b, c, h, w, d, t) = [16, 2, 8, 8, 8]
+        # 3 = (b, c, h, w, d, t) = [16, 4, 4, 4, 4]
+        # 4 = (b, c, h, w, d, t) = [16, 8, 2, 2, 2]
+        
+        for i in range(5):
+            print(f"{i} after Squeeze: {hidden_states_out[i].shape}")
+        
+        # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> [16, 1, 96, 96, 96]
+        x_in = self.temporal_squeeze0(x_in) # (b, h, w, d, c) = [16, 96, 96, 96, 1]
         enc0 = self.encoder1(x_in)
+        
         enc1 = self.encoder2(hidden_states_out[0])
         enc2 = self.encoder3(hidden_states_out[1])
         enc3 = self.encoder4(hidden_states_out[2])
         dec4 = self.encoder10(hidden_states_out[4])
+        
         dec3 = self.decoder5(dec4, hidden_states_out[3])
         dec2 = self.decoder4(dec3, enc3)
         dec1 = self.decoder3(dec2, enc2)
         dec0 = self.decoder2(dec1, enc1)
         out = self.decoder1(dec0, enc0)
+        
         logits = self.out(out)
 
         return logits
