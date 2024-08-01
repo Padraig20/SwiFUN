@@ -346,7 +346,7 @@ class SwinUNETR(nn.Module):
             in_channels=feature_size,
             out_channels=feature_size,
             kernel_size=3,
-            upsample_kernel_size=2,
+            upsample_kernel_size=6,
             norm_name=norm_name,
             res_block=True,
         )
@@ -460,14 +460,15 @@ class SwinUNETR(nn.Module):
         
         print(f"dec4: {dec4.shape} - hidden_states_out[3]: {hidden_states_out[3].shape}")
         dec3 = self.decoder5(dec4, hidden_states_out[3]) # [16, 288, 2, 2, 2] - [16, 288, 2, 2, 2]
-        print(f"dec3: {dec3.shape}")
-        dec2 = self.decoder4(dec3, enc3) 
-        print(f"dec2: {dec2.shape}")
-        dec1 = self.decoder3(dec2, enc2)
-        print(f"dec1: {dec1.shape}")
-        dec0 = self.decoder2(dec1, enc1)
-        print(f"dec0: {dec0.shape}")
-        out = self.decoder1(dec0, enc0)
+        print(f"dec3: {dec3.shape}") # [16, 288, 2, 2, 2]
+        dec2 = self.decoder4(dec3, enc3) # [16, 288, 2, 2, 2] - [16, 144, 4, 4, 4]
+        print(f"dec2: {dec2.shape}") # [16, 144, 4, 4, 4]
+        dec1 = self.decoder3(dec2, enc2) # [16, 144, 4, 4, 4] - [16, 72, 8, 8, 8]
+        print(f"dec1: {dec1.shape}") # [16, 72, 8, 8, 8]
+        dec0 = self.decoder2(dec1, enc1) # [16, 72, 8, 8, 8] - [16, 36, 16, 16, 16]
+        print(f"dec0: {dec0.shape}") # [16, 36, 16, 16, 16]
+        out = self.decoder1(dec0, enc0) # [16, 36, 16, 16, 16] - [16, 36, 96, 96, 96]
+        print(f"out: {out.shape}") # [16, 1, 96, 96, 96]
         
         logits = self.out(out)
 
