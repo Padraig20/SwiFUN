@@ -695,9 +695,9 @@ class SwinTransformer4D(nn.Module):
         patch_dim =  ((img_size[0]//patch_size[0]), (img_size[1]//patch_size[1]), (img_size[2]//patch_size[2]), (img_size[3]//patch_size[3]))
 
         #print img, patch size, patch dim
-        print("img_size: ", img_size)
-        print("patch_size: ", patch_size)
-        print("patch_dim: ", patch_dim)
+        #print("img_size: ", img_size)
+        #print("patch_size: ", patch_size)
+        #print("patch_dim: ", patch_dim)
         self.pos_embeds = nn.ModuleList()
         pos_embed_dim = embed_dim
         for i in range(self.num_layers):
@@ -709,7 +709,7 @@ class SwinTransformer4D(nn.Module):
         self.layers = nn.ModuleList()
         down_sample_mod = look_up_option(downsample, MERGING_MODE) if isinstance(downsample, str) else downsample
     
-        print(f"Layer dims 0: {int(embed_dim)}")
+        #print(f"Layer dims 0: {int(embed_dim)}")
 
         layer = BasicLayer(
             dim=int(embed_dim),
@@ -730,7 +730,7 @@ class SwinTransformer4D(nn.Module):
 
         # exclude last layer
         for i_layer in range(1, self.num_layers - 1):
-            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
+            #print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
             layer = BasicLayer(
                 dim=int(embed_dim * (c_multiplier**i_layer)),
                 depth=depths[i_layer],
@@ -749,7 +749,7 @@ class SwinTransformer4D(nn.Module):
             self.layers.append(layer)
 
         if not last_layer_full_MSA:
-            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers - 1)))}")
+            #print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers - 1)))}")
             layer = BasicLayer(
                 dim=int(embed_dim * c_multiplier ** (self.num_layers - 1)),
                 depth=depths[(self.num_layers - 1)],
@@ -838,7 +838,7 @@ class SwinTransformer4D(nn.Module):
         
         # assumption len depths = 4 (stages)
         
-        print(f"Layers: {len(self.layers)}")
+        #print(f"Layers: {len(self.layers)}")
         
         x1 = self.pos_embeds[0](x0)
         x1 = self.layers[0](x1.contiguous())
