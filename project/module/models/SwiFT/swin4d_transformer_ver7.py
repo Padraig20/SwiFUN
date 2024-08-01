@@ -727,7 +727,7 @@ class SwinTransformer4D(nn.Module):
         self.layers.append(layer)
 
         # exclude last layer
-        for i_layer in range(1, self.num_layers - 1):
+        for i_layer in range(0, self.num_layers - 1):
             print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
             layer = BasicLayer(
                 dim=int(embed_dim * (c_multiplier**i_layer)),
