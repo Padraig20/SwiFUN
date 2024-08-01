@@ -458,9 +458,10 @@ class SwinUNETR(nn.Module):
         dec4 = self.encoder10(hidden_states_out[4])
         print(f"dec4: {dec4.shape}")
         
-        dec3 = self.decoder5(dec4, hidden_states_out[3])
+        print(f"dec4: {dec4.shape} - hidden_states_out[3]: {hidden_states_out[3].shape}")
+        dec3 = self.decoder5(dec4, hidden_states_out[3]) # [16, 288, 2, 2, 2] - [16, 288, 2, 2, 2]
         print(f"dec3: {dec3.shape}")
-        dec2 = self.decoder4(dec3, enc3)
+        dec2 = self.decoder4(dec3, enc3) 
         print(f"dec2: {dec2.shape}")
         dec1 = self.decoder3(dec2, enc2)
         print(f"dec1: {dec1.shape}")
