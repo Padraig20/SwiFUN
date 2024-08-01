@@ -709,10 +709,10 @@ class SwinTransformer4D(nn.Module):
         self.layers = nn.ModuleList()
         down_sample_mod = look_up_option(downsample, MERGING_MODE) if isinstance(downsample, str) else downsample
     
-        print(f"Layer dims 0: {int(embed_dim*2)}")
+        print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
 
         layer = BasicLayer(
-            dim=int(embed_dim*2),
+            dim=int(embed_dim),
             depth=depths[0],
             num_heads=num_heads[0],
             window_size=self.first_window_size,
@@ -730,9 +730,9 @@ class SwinTransformer4D(nn.Module):
 
         # exclude last layer
         for i_layer in range(1, self.num_layers - 1):
-            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**(i_layer+1)))}")
+            print(f"Layer dims {i_layer}: {int(embed_dim * (c_multiplier**i_layer))}")
             layer = BasicLayer(
-                dim=int(embed_dim * (c_multiplier**(i_layer+1))),
+                dim=int(embed_dim * (c_multiplier**i_layer)),
                 depth=depths[i_layer],
                 num_heads=num_heads[i_layer],
                 window_size=self.window_size,
@@ -749,7 +749,7 @@ class SwinTransformer4D(nn.Module):
             self.layers.append(layer)
 
         if not last_layer_full_MSA:
-            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers)))}")
+            print(f"Layer dims {self.num_layers - 1}: {int(embed_dim * (c_multiplier**(self.num_layers - 1)))}")
             layer = BasicLayer(
                 dim=int(embed_dim * c_multiplier ** (self.num_layers - 1)),
                 depth=depths[(self.num_layers - 1)],
