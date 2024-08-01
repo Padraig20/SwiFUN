@@ -443,32 +443,32 @@ class SwinUNETR(nn.Module):
         
         # (b, c, h, w, d, t) = [16, 1, 96, 96, 96, 20] -> [16, 1, 96, 96, 96]
         
-        print(f"x_in: {x_in.shape}")
+        #print(f"x_in: {x_in.shape}")
         x_in = self.temporal_squeeze_init(x_in) # (b, h, w, d, c) = [16, 96, 96, 96, 1]
-        print(f"x_in after squeeze: {x_in.shape}")
+        #print(f"x_in after squeeze: {x_in.shape}")
         enc0 = self.encoder1(x_in)
-        print(f"enc0: {enc0.shape}")
+        #print(f"enc0: {enc0.shape}")
         
         enc1 = self.encoder2(hidden_states_out[0])
-        print(f"enc1: {enc1.shape}")
+        #print(f"enc1: {enc1.shape}")
         enc2 = self.encoder3(hidden_states_out[1])
-        print(f"enc2: {enc2.shape}")
+        #print(f"enc2: {enc2.shape}")
         enc3 = self.encoder4(hidden_states_out[2])
-        print(f"enc3: {enc3.shape}")
+        #print(f"enc3: {enc3.shape}")
         dec4 = self.encoder10(hidden_states_out[4])
-        print(f"dec4: {dec4.shape}")
+        #print(f"dec4: {dec4.shape}")
         
-        print(f"dec4: {dec4.shape} - hidden_states_out[3]: {hidden_states_out[3].shape}")
+        #print(f"dec4: {dec4.shape} - hidden_states_out[3]: {hidden_states_out[3].shape}")
         dec3 = self.decoder5(dec4, hidden_states_out[3]) # [16, 288, 2, 2, 2] - [16, 288, 2, 2, 2]
-        print(f"dec3: {dec3.shape}") # [16, 288, 2, 2, 2]
+        #print(f"dec3: {dec3.shape}") # [16, 288, 2, 2, 2]
         dec2 = self.decoder4(dec3, enc3) # [16, 288, 2, 2, 2] - [16, 144, 4, 4, 4]
-        print(f"dec2: {dec2.shape}") # [16, 144, 4, 4, 4]
+        #print(f"dec2: {dec2.shape}") # [16, 144, 4, 4, 4]
         dec1 = self.decoder3(dec2, enc2) # [16, 144, 4, 4, 4] - [16, 72, 8, 8, 8]
-        print(f"dec1: {dec1.shape}") # [16, 72, 8, 8, 8]
+        #print(f"dec1: {dec1.shape}") # [16, 72, 8, 8, 8]
         dec0 = self.decoder2(dec1, enc1) # [16, 72, 8, 8, 8] - [16, 36, 16, 16, 16]
-        print(f"dec0: {dec0.shape}") # [16, 36, 16, 16, 16]
+        #print(f"dec0: {dec0.shape}") # [16, 36, 16, 16, 16]
         out = self.decoder1(dec0, enc0) # [16, 36, 16, 16, 16] - [16, 36, 96, 96, 96]
-        print(f"out: {out.shape}") # [16, 1, 96, 96, 96]
+        #print(f"out: {out.shape}") # [16, 1, 96, 96, 96]
         
         logits = self.out(out)
 
