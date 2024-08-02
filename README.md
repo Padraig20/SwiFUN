@@ -39,4 +39,5 @@ The original SwiFUN adapted the input to use the channel dimension for the timep
 
 In order to fit the 4D data into the decoder U-NET architecture and to still remain computationally feasible, we chose to add an intermediate global average max pooling layer to squeeze the temporal dimension. This layer is able to learn the best representation of the 4D image among all the separate timepoints.
 
-![image](https://github.com/user-attachments/assets/bf93ba27-52c7-465b-bdbd-80597227c2d3)
+![image](https://github.com/user-attachments/assets/a26d3987-14d7-448c-8d1b-33145f5e08f3)
+
