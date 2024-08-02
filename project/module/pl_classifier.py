@@ -8,13 +8,12 @@ import os
 import pickle
 import scipy
 
-import torchmetrics
-import torchmetrics.classification
-from torchmetrics.classification import BinaryAccuracy, BinaryAUROC, BinaryROC
+from torchmetrics.classification import BinaryAccuracy, BinaryAUROC
 from torchmetrics import  PearsonCorrCoef # Accuracy,
 from torchmetrics.regression import R2Score
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, roc_curve
+from sklearn.metrics import balanced_accuracy_score, roc_curve
 import monai.transforms as monai_t
+from .utils.lr_scheduler import CosineAnnealingWarmUpRestarts
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import nibabel as nb
@@ -23,11 +22,10 @@ import nibabel as nb
 from .models.load_model import load_model
 from .utils.metrics import Metrics
 from .utils.parser import str2bool
-from .utils.lr_scheduler import WarmupCosineSchedule, CosineAnnealingWarmUpRestarts
 
 from einops import rearrange
 
-from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler, KBinsDiscretizer
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 class LitClassifier(pl.LightningModule):
     def __init__(self,data_module, **kwargs):
@@ -49,19 +47,10 @@ class LitClassifier(pl.LightningModule):
             print(f'target_max:{scaler.data_max_[0]},target_min:{scaler.data_min_[0]}')
         self.scaler = scaler
 
-        print(self.hparams.model)
-        self.model = load_model(self.hparams.model, self.hparams)
-
-        # Heads
-        if self.hparams.downstream_task == 'tfMRI_3D': # 3D volume prediction
-            self.output_head = nn.Identity() #load_model("swinunetr", self.hparams)
-        elif self.hparams.downstream_task_type == 'classification' or self.hparams.scalability_check:
-            self.output_head = load_model("clf_mlp", self.hparams)
-            #self.clf = load_model("clf_mlp", self.hparams)
-        elif self.hparams.downstream_task_type == 'regression':
-            self.output_head = load_model("reg_mlp", self.hparams)
-        else:
-            raise NotImplementedError("output head should be defined")
+        self.model = load_model("swinunetr", self.hparams)
+        
+        # HEAD
+        self.output_head = nn.Identity()
 
         self.metric = Metrics()
 
@@ -201,7 +190,7 @@ class LitClassifier(pl.LightningModule):
             elif self.hparams.loss_type == 'rc':
                 logits = logits.flatten(start_dim=1) # (batch,mask_dim)
                 target = target.flatten(start_dim=1) # (batch,mask_dim)
-                within_subj_loss, across_subj_loss = contrast_mse_loss(logits, target, subj)
+                within_subj_loss, across_subj_loss = contrast_mse_loss(logits, target, subj) # TODO implement contrastive loss
                 loss = self.hparams.within_subj_margin * within_subj_loss - self.hparams.across_subj_margin * across_subj_loss
 
             mse = F.mse_loss(logits, target)
@@ -657,20 +646,18 @@ class LitClassifier(pl.LightningModule):
         group.add_argument("--augment_only_intensity", action='store_true', help="whether to only apply intensity augmentation")
         
         ## model related
-        group.add_argument("--model", type=str, default="none", help="which model to be used")
         group.add_argument("--in_chans", type=int, default=1, help="Channel size of input image")
         group.add_argument("--out_chans", type=int, default=1, help="Channel size of target output")
-        group.add_argument("--embed_dim", type=int, default=24, help="embedding size (recommend to use 24, 36, 48)")
+        group.add_argument("--embed_dim", type=int, default=36, help="embedding size (recommend to use 24, 36, 48)")
         group.add_argument("--window_size", nargs="+", type=int, default=[4, 4, 4, 6], help="window size from the second layers")
         group.add_argument("--patch_size", nargs="+", type=int, default=[6, 6, 6, 1], help="patch size")
-        group.add_argument("--use_v2", action='store_true', help="whether to use SwinUNETR v2")
         group.add_argument("--depths", nargs="+", default=[2, 2, 6, 2], type=int, help="depth of layers in each stage of encoder")
         group.add_argument("--num_heads", nargs="+", default=[3, 6, 12, 24], type=int, help="The number of heads for each attention layer")
         group.add_argument("--c_multiplier", type=int, default=2, help="channel multiplier for Swin Transformer architecture")
         group.add_argument("--last_layer_full_MSA", type=str2bool, default=False, help="whether to use full-scale multi-head self-attention at the last layers")
         group.add_argument("--clf_head_version", type=str, default="v1", help="clf head version, v2 has a hidden layer")
         group.add_argument("--attn_drop_rate", type=float, default=0, help="dropout rate of attention layers")
-        #TODO add first window size
+        group.add_argument("--first_window_size", nargs="+", type=int, default=[4, 4, 4, 6], help="window size in the first layer")
 
         ## others
         group.add_argument("--scalability_check", action='store_true', help="whether to check scalability")

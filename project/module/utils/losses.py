@@ -3,7 +3,7 @@ import torch.nn as nn
 import numpy as np
 
 #################################################################################################
-# Contrastice loss code adapted from TCLR: Temporal Contrastive Learning for Video Representation
+# Contrastive loss code adapted from TCLR: Temporal Contrastive Learning for Video Representation
 # https://github.com/DAVEISHAN/TCLR
 #################################################################################################
 
