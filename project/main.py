@@ -181,17 +181,17 @@ def cli_main():
             model.model.load_state_dict(new_state_dict)
 
     # ------------ run -------------
-    #if args.test_only:
-    #    trainer.test(model, datamodule=data_module, ckpt_path=args.test_ckpt_path) # dataloaders=data_module
-    #else:
-    #    if args.resume_ckpt_path is None:
+    if args.test_only:
+        trainer.test(model, datamodule=data_module, ckpt_path=args.test_ckpt_path) # dataloaders=data_module
+    else:
+        if args.resume_ckpt_path is None:
             # New run
-    #        trainer.fit(model, datamodule=data_module)
-    #    else:
+            trainer.fit(model, datamodule=data_module)
+        else:
             # Resume existing run
-    #        trainer.fit(model, datamodule=data_module, ckpt_path=args.resume_ckpt_path)
+            trainer.fit(model, datamodule=data_module, ckpt_path=args.resume_ckpt_path)
 
-    #    trainer.test(model, dataloaders=data_module)
+        trainer.test(model, dataloaders=data_module)
     
     if args.save_encoder:
         model.save_encoder(args.save_encoder)
