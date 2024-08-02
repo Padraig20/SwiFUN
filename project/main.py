@@ -194,7 +194,7 @@ def cli_main():
     #    trainer.test(model, dataloaders=data_module)
     
     if args.save_encoder:
-        model.save_encoder()
+        model.save_encoder(args.save_encoder)
 
 
 if __name__ == "__main__":
