@@ -37,7 +37,6 @@ python project/main.py $TRAINER_ARGS \
   --dataset_split_num 1 \
   --seed 1 \
   --learning_rate 5e-5 \
-  --model swinunetr \
   --attn_drop_rate 0.3 \
   --depths 2 2 6 2 \
   --embed_dim 36 \

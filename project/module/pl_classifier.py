@@ -141,6 +141,9 @@ class LitClassifier(pl.LightningModule):
             
         return img
     
+    def save_encoder(self, path):
+        torch.save(self.model.swinViT.state_dict(), f"{path}/SwiFT-encoder.pth")
+    
     def _compute_logits(self, batch, augment_during_training=None):
         fmri, subj, target_value, tr, sex = batch.values()
        

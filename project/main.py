@@ -31,6 +31,9 @@ def cli_main():
     parser.add_argument("--test_ckpt_path", type=str, help="A path to the previous checkpoint that intends to evaluate (--test_only should be True)")
     parser.add_argument("--freeze_feature_extractor", action='store_true', help="Whether to freeze the feature extractor (for evaluating the pre-trained weight)")
     parser.add_argument("--grad_clip", action='store_true', help="whether to use scheduler")
+    
+    parser.add_argument("--save_encoder", type=str, default=None, help="Path to save the SwiFT encoder after training, if wanted")
+    
     temp_args, _ = parser.parse_known_args()
 
     # Set classifier
@@ -178,17 +181,20 @@ def cli_main():
             model.model.load_state_dict(new_state_dict)
 
     # ------------ run -------------
-    if args.test_only:
-        trainer.test(model, datamodule=data_module, ckpt_path=args.test_ckpt_path) # dataloaders=data_module
-    else:
-        if args.resume_ckpt_path is None:
+    #if args.test_only:
+    #    trainer.test(model, datamodule=data_module, ckpt_path=args.test_ckpt_path) # dataloaders=data_module
+    #else:
+    #    if args.resume_ckpt_path is None:
             # New run
-            trainer.fit(model, datamodule=data_module)
-        else:
+    #        trainer.fit(model, datamodule=data_module)
+    #    else:
             # Resume existing run
-            trainer.fit(model, datamodule=data_module, ckpt_path=args.resume_ckpt_path)
+    #        trainer.fit(model, datamodule=data_module, ckpt_path=args.resume_ckpt_path)
 
-        trainer.test(model, dataloaders=data_module)
+    #    trainer.test(model, dataloaders=data_module)
+    
+    if args.save_encoder:
+        model.save_encoder()
 
 
 if __name__ == "__main__":
