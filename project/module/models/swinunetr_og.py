@@ -162,7 +162,7 @@ class SwinUNETR(nn.Module):
         #c_multiplier = 2
         
         self.swinViT = SwinTransformer4D(
-            in_chans=in_channels,
+            in_chans=1, # in_channels is always 1 for our task
             embed_dim=feature_size,
             window_size=window_size,
             patch_size=patch_size,
