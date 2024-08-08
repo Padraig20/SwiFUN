@@ -71,74 +71,29 @@ class LitClassifier(pl.LightningModule):
         return self.output_head(self.model(x))
     
     def augment(self, img):
-        if self.hparams.downstream_task == 'tfMRI_3D':
-            B, T, H, W, D = img.shape
+        B, C, H, W, D, T = img.shape
 
-            device = img.device
+        device = img.device
+        img = rearrange(img, 'b c h w d t -> b t c h w d')
 
-            rand_affine = monai_t.RandAffine(
-                prob=1.0,
-                # 0.175 rad = 10 degrees
-                rotate_range=(0.175, 0.175, 0.175),
-                scale_range = (0.1, 0.1, 0.1),
-                mode = "bilinear",
-                padding_mode = "border",
-                device = device
-            )
+        rand_affine = monai_t.RandAffine(
+            prob=1.0,
+            rotate_range=(0.175, 0.175, 0.175), # 0.175 rad = 10 degrees
+            scale_range = (0.1, 0.1, 0.1),
+            mode = "bilinear",
+            padding_mode = "border",
+            device = device
+        )
+        rand_noise = monai_t.RandGaussianNoise(prob=0.3, std=0.1)
+        rand_smooth = monai_t.RandGaussianSmooth(sigma_x=(0.0, 0.5), sigma_y=(0.0, 0.5), sigma_z=(0.0, 0.5), prob=0.1)
+        comp = monai_t.Compose([rand_affine, rand_noise, rand_smooth]) # 
 
-            rand_noise = monai_t.RandGaussianNoise(prob=0.3, std=0.1)
-            rand_smooth = monai_t.RandGaussianSmooth(sigma_x=(0.0, 0.5), sigma_y=(0.0, 0.5), sigma_z=(0.0, 0.5), prob=0.1)
-            if self.hparams.augment_only_intensity:
-                comp = monai_t.Compose([rand_noise, rand_smooth])
-            else:
-                comp = monai_t.Compose([rand_affine, rand_noise, rand_smooth]) 
-
-            for b in range(B):
-                aug_seed = torch.randint(0, 10000000, (1,)).item()
-                # set augmentation seed to be the same for all time steps
-                for t in range(T):
-                    if self.hparams.augment_only_affine:
-                        rand_affine.set_random_state(seed=aug_seed)
-                        img[b, t, :, :, :, :] = rand_affine(img[b, t, :, :, :, :])
-                    else:
-                        comp.set_random_state(seed=aug_seed)
-                        img[b, t, :, :, :, :] = comp(img[b, t, :, :, :, :])
-
-        else:
-            B, C, H, W, D, T = img.shape
-
-            device = img.device
-            # print("img device: ", img.device)
-            img = rearrange(img, 'b c h w d t -> b t c h w d')
-            # print("img shape: ", img.shape)
-
-            rand_affine = monai_t.RandAffine(
-                prob=1.0,
-                # 0.175 rad = 10 degrees
-                rotate_range=(0.175, 0.175, 0.175),
-                scale_range = (0.1, 0.1, 0.1),
-                mode = "bilinear",
-                padding_mode = "border",
-                device = device
-            )
-            rand_noise = monai_t.RandGaussianNoise(prob=0.3, std=0.1)
-            rand_smooth = monai_t.RandGaussianSmooth(sigma_x=(0.0, 0.5), sigma_y=(0.0, 0.5), sigma_z=(0.0, 0.5), prob=0.1)
-            comp = monai_t.Compose([rand_affine, rand_noise, rand_smooth]) # 
-
-            for b in range(B):
-                aug_seed = torch.randint(0, 10000000, (1,)).item()
-                # set augmentation seed to be the same for all time steps
-                for t in range(T):
-                    comp.set_random_state(seed=aug_seed)
-                    # print("input shape: ", img[b, t, :, :, :, :].shape)
-                    # aug_img = comp(img[b, t, :, :, :, :])
-                    img[b, t, :, :, :, :] = comp(img[b, t, :, :, :, :])
-
-                    # rand_affine.set_random_state(seed=aug_seed)
-                    # img[b, t, :, :, :, :] = rand_affine(img[b, t, :, :, :, :])
-
-            img = rearrange(img, 'b t c h w d -> b c h w d t')
-            
+        for b in range(B):
+            aug_seed = torch.randint(0, 10000000, (1,)).item()
+            for t in range(T): # set augmentation seed to be the same for all time steps
+                comp.set_random_state(seed=aug_seed)
+                img[b, t, :, :, :, :] = comp(img[b, t, :, :, :, :])
+        img = rearrange(img, 'b t c h w d -> b c h w d t')    
         return img
     
     def save_encoder(self, path):
