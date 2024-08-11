@@ -153,7 +153,7 @@ class SwinUNETR(nn.Module):
         self.normalize = normalize
         
         # sample inoput shape
-        #in_channels = 1
+        in_channels = 1
         #feature_size = 36
         #window_size = (4, 4, 4, 4)
         #patch_size = (6, 6, 6, 1)
@@ -162,7 +162,7 @@ class SwinUNETR(nn.Module):
         #c_multiplier = 2
         
         self.swinViT = SwinTransformer4D(
-            in_chans=1, # in_channels is always 1 for our task
+            in_chans=in_channels, # in_channels is always 1 for our task
             embed_dim=feature_size,
             window_size=window_size,
             patch_size=patch_size,
