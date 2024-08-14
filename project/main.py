@@ -153,6 +153,7 @@ def cli_main():
     # ------------ model -------------
     model = Classifier(data_module = data_module, **vars(args))  # swifun: Classifier(**vars(args)) 
 
+    """
     if args.load_model_path is not None:
         print(f'loading model from {args.load_model_path}')
         path = args.load_model_path
@@ -179,6 +180,18 @@ def cli_main():
                     print('notice: named parameter - {} is randomly initialized'.format(name))
         else:
             model.model.swinViT.load_state_dict(new_state_dict)
+    """
+
+    if args.load_model_path is not None:
+        print(f'loading model from {args.load_model_path}')
+        path = args.load_model_path
+        ckpt = torch.load(path)
+        new_state_dict = OrderedDict()
+        for k, v in ckpt['state_dict'].items():
+            if 'model.' in k: #transformer-related layers
+                new_state_dict[k.removeprefix("model.")] = v
+
+        model.model.swinViT.load_state_dict(new_state_dict)
 
     # ------------ run -------------
     if args.test_only:
