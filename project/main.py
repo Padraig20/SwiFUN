@@ -165,7 +165,7 @@ def cli_main():
          #partial state dict
         if args.downstream_task == 'tfMRI_3D':
             print('loading parameters onto new model...')
-            own_state = model.model.state_dict()
+            own_state = model.model.swinViT.state_dict()
             loaded = {name:False for name in own_state.keys()}
             for name, param in new_state_dict.items():
                 if name not in own_state:
@@ -178,7 +178,7 @@ def cli_main():
                 if not was_loaded:
                     print('notice: named parameter - {} is randomly initialized'.format(name))
         else:
-            model.model.load_state_dict(new_state_dict)
+            model.model.swinViT.load_state_dict(new_state_dict)
 
     # ------------ run -------------
     if args.test_only:
