@@ -191,7 +191,6 @@ def cli_main():
             if 'model.' in k: #transformer-related layers
                 if not "head.weight" in k and not "head.bias" in k:
                     new_state_dict[k.removeprefix("model.")] = v
-                new_state_dict[k.removeprefix("model.")] = v
         model.model.swinViT.load_state_dict(new_state_dict)
     
 
