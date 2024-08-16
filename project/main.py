@@ -153,35 +153,6 @@ def cli_main():
     # ------------ model -------------
     model = Classifier(data_module = data_module, **vars(args))  # swifun: Classifier(**vars(args)) 
 
-    """
-    if args.load_model_path is not None:
-        print(f'loading model from {args.load_model_path}')
-        path = args.load_model_path
-        ckpt = torch.load(path)
-        new_state_dict = OrderedDict()
-        for k, v in ckpt['state_dict'].items():
-            if 'model.' in k: #transformer-related layers
-                new_state_dict[k.removeprefix("model.")] = v
-
-         #partial state dict
-        if args.downstream_task == 'tfMRI_3D':
-            print('loading parameters onto new model...')
-            own_state = model.model.swinViT.state_dict()
-            loaded = {name:False for name in own_state.keys()}
-            for name, param in new_state_dict.items():
-                if name not in own_state:
-                    print('notice: {} is not part of new model and was not loaded.'.format(name))
-                    continue
-                param = param.data
-                own_state[name].copy_(param)
-                loaded[name] = True
-            for name,was_loaded in loaded.items():
-                if not was_loaded:
-                    print('notice: named parameter - {} is randomly initialized'.format(name))
-        else:
-            model.model.swinViT.load_state_dict(new_state_dict)
-    """
-
     if args.load_model_path is not None:
         print(f'loading model from {args.load_model_path}')
         path = args.load_model_path
@@ -192,19 +163,6 @@ def cli_main():
                 if not "head.weight" in k and not "head.bias" in k:
                     new_state_dict[k.removeprefix("model.")] = v
         model.model.swinViT.load_state_dict(new_state_dict)
-    
-    state_dict = model.state_dict()
-
-    param_names = list(state_dict.keys())
-
-    index_of_interest = [163, 164]  # The indices from the error message
-
-    for idx in index_of_interest:
-        if idx < len(param_names):
-            param_name = param_names[idx]
-            print(f"Parameter at index {idx}: {param_name}")
-        else:
-            print(f"Index {idx} is out of bounds for the model parameters.")
 
     # ------------ run -------------
     if args.test_only:
