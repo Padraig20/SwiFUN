@@ -189,9 +189,9 @@ def cli_main():
         new_state_dict = OrderedDict()
         for k, v in ckpt['state_dict'].items():
             if 'model.' in k: #transformer-related layers
+                if not k.removeprefix("model.").startswith('head.'):
+                    new_state_dict[k.removeprefix("model.")] = v
                 new_state_dict[k.removeprefix("model.")] = v
-        print(model.model.swinViT.state_dict().keys())
-        print(new_state_dict.keys())
         model.model.swinViT.load_state_dict(new_state_dict)
     
 
