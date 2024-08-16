@@ -184,14 +184,17 @@ def cli_main():
 
     if args.load_model_path is not None:
         print(f'loading model from {args.load_model_path}')
-        path = args.load_model_path
-        ckpt = torch.load(path)
-        new_state_dict = OrderedDict()
-        for k, v in ckpt['state_dict'].items():
-            if 'model.' in k: #transformer-related layers
-                new_state_dict[k.removeprefix("model.")] = v
-        print(model.model.swinViT.state_dict)
-        model.model.swinViT.load_state_dict(new_state_dict)
+        #path = args.load_model_path
+        #ckpt = torch.load(path)
+        #new_state_dict = OrderedDict()
+        #for k, v in ckpt['state_dict'].items():
+        #    if 'model.' in k: #transformer-related layers
+        #        new_state_dict[k.removeprefix("model.")] = v
+        #print(model.model.swinViT.state_dict)
+        #model.model.swinViT.load_state_dict(new_state_dict)
+        ckpt = torch.load(args.load_model_path)
+        model.model.swinVit.load_state_dict(ckpt)
+    
 
     # ------------ run -------------
     if args.test_only:
