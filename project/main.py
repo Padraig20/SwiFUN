@@ -193,6 +193,18 @@ def cli_main():
                     new_state_dict[k.removeprefix("model.")] = v
         model.model.swinViT.load_state_dict(new_state_dict)
     
+    state_dict = model.state_dict()
+
+    param_names = list(state_dict.keys())
+
+    index_of_interest = [163, 164]  # The indices from the error message
+
+    for idx in index_of_interest:
+        if idx < len(param_names):
+            param_name = param_names[idx]
+            print(f"Parameter at index {idx}: {param_name}")
+        else:
+            print(f"Index {idx} is out of bounds for the model parameters.")
 
     # ------------ run -------------
     if args.test_only:
