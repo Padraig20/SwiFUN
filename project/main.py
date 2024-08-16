@@ -193,7 +193,7 @@ def cli_main():
         #print(model.model.swinViT.state_dict)
         #model.model.swinViT.load_state_dict(new_state_dict)
         ckpt = torch.load(args.load_model_path)
-        model.model.swinViT.load_state_dict(ckpt)
+        model.model.swinViT.load_state_dict(ckpt['state_dict'])
     
 
     # ------------ run -------------
